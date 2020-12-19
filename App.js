@@ -3,6 +3,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import logo from './assets/logo.png';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
 //<Image source={logo} style={{width: 305, height: 159}}/>
 //<Image source={{ uri: "https://i.imgur.com/TkIrScD.png" }} style={{ width: 305, height: 159 }} />
 
@@ -26,17 +27,27 @@ export default function App() {
             return; // do nothing
         }
 
-        setSelectedImage({localUri: pickerResult.uri});
+        setSelectedImage({localUri: pickerResult.uri}); // set state to selected image
     };
     //
 
-    if (selectedImage != null) {
+    let openShareDialogAsync = async () => { // for sharing image block
+        if (!(await Sharing.isAvailableAsync())) {
+            alert("Uh oh, sharing isn't available on your platform");
+        }
+        await Sharing.shareAsync(selectedImage.localUri);
+    };
+
+    if (selectedImage != null) { // check if the state is null
         return (
             <View style={styles.container}>
               <Image
                 source={{uri: selectedImage.localUri}}
                 style={styles.thumbnail}
                 />
+                <TouchableOpacity onPress={openShareDialogAsync} style={styles.button}>
+                    <Text style={styles.buttonText}>Share this photo</Text>
+                </TouchableOpacity>
             </View>
         );
     }
